@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: disputehub-postgres
+    environment:
+      POSTGRES_DB: disputehub
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - disputehub-network
+
+  # Backend (Spring Boot)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: disputehub-backend
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: disputehub
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET: mySecretKeyForDisputeHubPortalShouldBeAtLeast256BitsLongForHS256Algorithm
+      CORS_ORIGINS: http://localhost:3000,http://localhost
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - disputehub-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/auth/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend (React + Vite)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: disputehub-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - disputehub-network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  disputehub-network:
+    driver: bridge

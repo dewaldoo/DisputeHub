@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!--
+        Logback Configuration for Structured JSON Logging
+
+        EXPLANATION:
+        This configures enterprise-grade structured logging using Logstash JSON format.
+
+        WHY JSON LOGS?
+        - Machine-readable (parsed by ELK, Splunk, DataDog)
+        - Searchable by any field (userId, traceId, disputeId, etc.)
+        - Enables log aggregation across microservices
+        - Correlation IDs link related logs across requests
+
+        APPENDERS:
+        - CONSOLE_JSON: Structured JSON output (production)
+        - CONSOLE_PLAIN: Human-readable (development)
+
+        PROFILES:
+        - dev: Uses plain text logs (easier to read locally)
+        - prod: Uses JSON logs (for log aggregation tools)
+    -->
+
+    <!-- Property: Log pattern for plain text output -->
+    <property name="CONSOLE_LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%thread] %-40.40logger{39} : %m%n"/>
+
+    <!--
+        JSON Appender - Production Logging
+
+        LogstashEncoder outputs JSON with:
+        - Standard fields: timestamp, level, logger, message, thread
+        - MDC fields: traceId, userId, userRole (from filter)
+        - Custom fields: disputeId, transactionId (from log statements)
+        - Stack traces: Formatted as JSON array
+    -->
+    <appender name="CONSOLE_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <!-- Include caller data (file, line number) - useful but slower -->
+            <includeCallerData>false</includeCallerData>
+            <!-- Include MDC fields in every log -->
+            <includeMdcKeyNames>traceId,spanId,userId,userRole,requestMethod,requestPath,clientIp</includeMdcKeyNames>
+        </encoder>
+    </appender>
+
+    <!--
+        Plain Text Appender - Development Logging
+
+        Human-readable format for local development.
+        Easier to read in console during debugging.
+    -->
+    <appender name="CONSOLE_PLAIN" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!--
+        Logger Configuration
+
+        ROOT logger:
+        - Default level: INFO
+        - Production: JSON output
+        - Development: Plain text output
+
+        Package-specific loggers:
+        - com.disputehub.api: DEBUG (our application)
+        - org.springframework.security: INFO (security framework)
+        - org.hibernate.SQL: DEBUG (SQL queries - helpful for debugging)
+    -->
+
+    <!-- Development Profile - Plain Text Logs -->
+    <springProfile name="dev,default">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_PLAIN"/>
+        </root>
+        <logger name="com.disputehub.api" level="DEBUG"/>
+        <logger name="org.springframework.security" level="INFO"/>
+        <logger name="org.hibernate.SQL" level="DEBUG"/>
+        <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE"/>
+    </springProfile>
+
+    <!-- Production Profile - JSON Logs -->
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_JSON"/>
+        </root>
+        <logger name="com.disputehub.api" level="INFO"/>
+        <logger name="org.springframework.security" level="WARN"/>
+        <logger name="org.hibernate.SQL" level="WARN"/>
+    </springProfile>
+
+    <!-- Test Profile - Minimal Logging -->
+    <springProfile name="test">
+        <root level="WARN">
+            <appender-ref ref="CONSOLE_PLAIN"/>
+        </root>
+        <logger name="com.disputehub.api" level="INFO"/>
+    </springProfile>
+
+</configuration>
