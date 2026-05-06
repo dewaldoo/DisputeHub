@@ -35,6 +35,7 @@ export const AdminDashboard: React.FC = () => {
       apiService.updateDisputeStatus(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allDisputes'] });
+      queryClient.invalidateQueries({ queryKey: ['disputeStats'] });
       setShowStatusModal(false);
       setSelectedDispute(null);
       setError('');
