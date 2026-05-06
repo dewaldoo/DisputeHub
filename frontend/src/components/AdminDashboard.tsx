@@ -15,10 +15,10 @@ export const AdminDashboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 20;
 
-  // Fetch all disputes (paginated)
+  // Fetch all disputes (paginated with server-side filtering)
   const { data: disputesPage, isLoading } = useQuery({
-    queryKey: ['allDisputes', currentPage, pageSize],
-    queryFn: () => apiService.getAllDisputes(currentPage, pageSize),
+    queryKey: ['allDisputes', currentPage, pageSize, filterStatus],
+    queryFn: () => apiService.getAllDisputes(currentPage, pageSize, 'createdAt', 'DESC', filterStatus),
   });
 
   // Fetch dispute statistics
@@ -102,10 +102,8 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const filteredDisputes = disputes?.filter((dispute) => {
-    if (filterStatus === 'ALL') return true;
-    return dispute.status === filterStatus;
-  });
+  // Server-side filtering now handles this, so no client-side filter needed
+  const filteredDisputes = disputes;
 
   const getStatusCount = (status: string) => {
     return stats?.[status] || 0;
@@ -220,7 +218,10 @@ export const AdminDashboard: React.FC = () => {
             <label className="text-sm font-medium text-gray-700">Filter by Status:</label>
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+              onChange={(e) => {
+                setFilterStatus(e.target.value);
+                setCurrentPage(0); // Reset to first page when filter changes
+              }}
               className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             >
               <option value="ALL">All Disputes</option>

@@ -137,11 +137,12 @@ public class DisputeController {
             @Parameter(description = "Page number (0-indexed)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size (max 100)") @RequestParam(defaultValue = "20") int size,
             @Parameter(description = "Sort field: createdAt, status, updatedAt") @RequestParam(defaultValue = "createdAt") String sortBy,
-            @Parameter(description = "Sort direction: ASC or DESC") @RequestParam(defaultValue = "DESC") String direction) {
-        log.info("GET /api/disputes - Admin fetching all disputes - Page: {}, Size: {}", page, size);
+            @Parameter(description = "Sort direction: ASC or DESC") @RequestParam(defaultValue = "DESC") String direction,
+            @Parameter(description = "Filter by status (optional)") @RequestParam(required = false) String status) {
+        log.info("GET /api/disputes - Admin fetching all disputes - Page: {}, Size: {}, Status: {}", page, size, status);
         Sort.Direction sortDirection = direction.equalsIgnoreCase("DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, Math.min(size, 100), Sort.by(sortDirection, sortBy));
-        Page<Dispute> disputes = disputeService.getAllDisputes(pageable);
+        Page<Dispute> disputes = disputeService.getAllDisputes(pageable, status);
         Page<DisputeResponse> responses = disputes.map(disputeMapper::toResponse);
         return ResponseEntity.ok(responses);
     }

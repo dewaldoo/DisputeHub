@@ -123,11 +123,13 @@ class ApiService {
     return response.data;
   }
 
-  async getAllDisputes(page: number = 0, size: number = 20, sortBy: string = 'createdAt', direction: string = 'DESC'): Promise<Page<Dispute>> {
+  async getAllDisputes(page: number = 0, size: number = 20, sortBy: string = 'createdAt', direction: string = 'DESC', status?: string): Promise<Page<Dispute>> {
     // Admin disputes - PAGINATED (admins view all disputes)
-    const response = await this.api.get<Page<Dispute>>('/api/disputes', {
-      params: { page, size, sortBy, direction }
-    });
+    const params: any = { page, size, sortBy, direction };
+    if (status && status !== 'ALL') {
+      params.status = status;
+    }
+    const response = await this.api.get<Page<Dispute>>('/api/disputes', { params });
     return response.data;
   }
 

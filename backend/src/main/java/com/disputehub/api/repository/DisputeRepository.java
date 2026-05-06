@@ -52,6 +52,16 @@ public interface DisputeRepository extends JpaRepository<Dispute, Long> {
     Page<Dispute> findAllWithDetails(Pageable pageable);
 
     /**
+     * Find disputes by status with JOIN FETCH for admin filtering.
+     */
+    @Query(value = "SELECT DISTINCT d FROM Dispute d " +
+                   "LEFT JOIN FETCH d.user " +
+                   "LEFT JOIN FETCH d.transaction " +
+                   "WHERE d.status = :status",
+           countQuery = "SELECT COUNT(d) FROM Dispute d WHERE d.status = :status")
+    Page<Dispute> findByStatusWithDetails(@Param("status") DisputeStatus status, Pageable pageable);
+
+    /**
      * Find dispute by transaction ID.
      *
      * WHY OPTIONAL?

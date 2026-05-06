@@ -99,7 +99,16 @@ public class DisputeService {
      *
      * Uses JOIN FETCH to prevent N+1 queries (loads user + transaction in single query).
      */
-    public Page<Dispute> getAllDisputes(Pageable pageable) {
+    public Page<Dispute> getAllDisputes(Pageable pageable, String statusFilter) {
+        if (statusFilter != null && !statusFilter.isEmpty()) {
+            try {
+                DisputeStatus status = DisputeStatus.valueOf(statusFilter);
+                return disputeRepository.findByStatusWithDetails(status, pageable);
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid status filter: {}", statusFilter);
+                return disputeRepository.findAllWithDetails(pageable);
+            }
+        }
         return disputeRepository.findAllWithDetails(pageable);
     }
 
