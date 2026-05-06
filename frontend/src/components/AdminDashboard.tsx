@@ -133,7 +133,7 @@ export const AdminDashboard: React.FC = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5 mb-8">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-6 mb-8">
           <div className="bg-white overflow-hidden shadow rounded-lg">
             <div className="p-5">
               <div className="flex items-center">
@@ -167,6 +167,19 @@ export const AdminDashboard: React.FC = () => {
                   <dt className="text-sm font-medium text-gray-500 truncate">Under Review</dt>
                   <dd className="mt-1 text-3xl font-semibold text-blue-600">
                     {getStatusCount(DisputeStatus.UNDER_REVIEW)}
+                  </dd>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white overflow-hidden shadow rounded-lg">
+            <div className="p-5">
+              <div className="flex items-center">
+                <div className="flex-1">
+                  <dt className="text-sm font-medium text-gray-500 truncate">Merchant Contacted</dt>
+                  <dd className="mt-1 text-3xl font-semibold text-purple-600">
+                    {getStatusCount(DisputeStatus.MERCHANT_CONTACTED)}
                   </dd>
                 </div>
               </div>
