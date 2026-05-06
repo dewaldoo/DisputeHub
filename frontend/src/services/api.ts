@@ -138,6 +138,11 @@ class ApiService {
     const response = await this.api.put<Dispute>(`/api/disputes/${disputeId}/status`, data);
     return response.data;
   }
+
+  async getDisputeStats(): Promise<Record<string, number>> {
+    const response = await this.api.get<Record<string, number>>('/api/disputes/stats');
+    return response.data;
+  }
 }
 
 export const apiService = new ApiService();

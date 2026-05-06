@@ -250,4 +250,26 @@ public class DisputeController {
                 .toList();
         return ResponseEntity.ok(responses);
     }
+
+    @Operation(
+        summary = "Get dispute statistics",
+        description = "Get counts of disputes by status. Admin only."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Statistics retrieved successfully"
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden - requires ADMIN role"
+        )
+    })
+    @GetMapping("/stats")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<java.util.Map<String, Long>> getDisputeStats() {
+        log.info("GET /api/disputes/stats - Admin fetching dispute statistics");
+        java.util.Map<String, Long> stats = disputeService.getDisputeStatistics();
+        return ResponseEntity.ok(stats);
+    }
 }

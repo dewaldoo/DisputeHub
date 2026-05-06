@@ -176,4 +176,15 @@ public class DisputeService {
         }
         return auditLogRepository.findByDispute_IdOrderByTimestampAsc(disputeId);
     }
+
+    public java.util.Map<String, Long> getDisputeStatistics() {
+        java.util.Map<String, Long> stats = new java.util.HashMap<>();
+        stats.put("PENDING", disputeRepository.countByStatus(DisputeStatus.PENDING));
+        stats.put("UNDER_REVIEW", disputeRepository.countByStatus(DisputeStatus.UNDER_REVIEW));
+        stats.put("MERCHANT_CONTACTED", disputeRepository.countByStatus(DisputeStatus.MERCHANT_CONTACTED));
+        stats.put("RESOLVED", disputeRepository.countByStatus(DisputeStatus.RESOLVED));
+        stats.put("REJECTED", disputeRepository.countByStatus(DisputeStatus.REJECTED));
+        stats.put("TOTAL", disputeRepository.count());
+        return stats;
+    }
 }

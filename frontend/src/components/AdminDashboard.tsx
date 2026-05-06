@@ -21,6 +21,12 @@ export const AdminDashboard: React.FC = () => {
     queryFn: () => apiService.getAllDisputes(currentPage, pageSize),
   });
 
+  // Fetch dispute statistics
+  const { data: stats } = useQuery({
+    queryKey: ['disputeStats'],
+    queryFn: () => apiService.getDisputeStats(),
+  });
+
   const disputes = disputesPage?.content || [];
 
   // Update dispute status mutation
@@ -101,8 +107,7 @@ export const AdminDashboard: React.FC = () => {
   });
 
   const getStatusCount = (status: string) => {
-    if (!disputes) return 0;
-    return disputes.filter((d) => d.status === status).length;
+    return stats?.[status] || 0;
   };
 
   return (
@@ -135,7 +140,7 @@ export const AdminDashboard: React.FC = () => {
                 <div className="flex-1">
                   <dt className="text-sm font-medium text-gray-500 truncate">Total Disputes</dt>
                   <dd className="mt-1 text-3xl font-semibold text-gray-900">
-                    {disputes?.length || 0}
+                    {stats?.TOTAL || 0}
                   </dd>
                 </div>
               </div>
