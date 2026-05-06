@@ -17,7 +17,7 @@ export const AdminDashboard: React.FC = () => {
 
   // Fetch all disputes (paginated)
   const { data: disputesPage, isLoading } = useQuery({
-    queryKey: ['allDisputes', currentPage],
+    queryKey: ['allDisputes', currentPage, pageSize],
     queryFn: () => apiService.getAllDisputes(currentPage, pageSize),
   });
 

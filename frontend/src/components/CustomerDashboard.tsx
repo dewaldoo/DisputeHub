@@ -17,13 +17,13 @@ export const CustomerDashboard: React.FC = () => {
 
   // Fetch transactions (paginated)
   const { data: transactionsPage, isLoading: transactionsLoading } = useQuery({
-    queryKey: ['transactions', transactionPage],
-    queryFn: () => apiService.getTransactions(transactionPage, 20),
+    queryKey: ['transactions', transactionPage, 2],
+    queryFn: () => apiService.getTransactions(transactionPage, 2),
   });
 
   // Fetch disputeable transactions (paginated - first page only)
   const { data: disputeableTransactionsPage } = useQuery({
-    queryKey: ['disputeableTransactions'],
+    queryKey: ['disputeableTransactions', 20],
     queryFn: () => apiService.getDisputeableTransactions(0, 20),
   });
 
