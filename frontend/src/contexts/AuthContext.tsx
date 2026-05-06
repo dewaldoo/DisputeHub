@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { User, LoginRequest, RegisterRequest, AuthResponse } from '../types';
 import { apiService } from '../services/api';
 
@@ -20,6 +21,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     // Check for stored user on mount
@@ -78,6 +80,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    // Clear all React Query cache to prevent data leakage between users
+    queryClient.clear();
   };
 
   const value: AuthContextType = {
