@@ -31,7 +31,7 @@ public class TransactionService {
      * Pagination is required to prevent OOM, but caching every page wastes memory.
      * Most users only view the first page (recent transactions).
      */
-    @Cacheable(value = "transactions", key = "#username", condition = "#pageable.pageNumber == 0")
+    @Cacheable(value = "transactions", key = "#username + '_' + #pageable.pageSize", condition = "#pageable.pageNumber == 0")
     public Page<Transaction> getMyTransactions(String username, Pageable pageable) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -43,7 +43,7 @@ public class TransactionService {
      * Get paginated disputeable transactions for a user.
      * Caches ONLY the first page.
      */
-    @Cacheable(value = "disputeableTransactions", key = "#username", condition = "#pageable.pageNumber == 0")
+    @Cacheable(value = "disputeableTransactions", key = "#username + '_' + #pageable.pageSize", condition = "#pageable.pageNumber == 0")
     public Page<Transaction> getDisputeableTransactions(String username, Pageable pageable) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
