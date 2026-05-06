@@ -28,13 +28,11 @@ services:
       dockerfile: Dockerfile
     container_name: disputehub-backend
     environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: disputehub
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-      JWT_SECRET: mySecretKeyForDisputeHubPortalShouldBeAtLeast256BitsLongForHS256Algorithm
-      CORS_ORIGINS: http://localhost:3000,http://localhost
+      spring.datasource.url: jdbc:postgresql://postgres:5432/disputehub
+      spring.datasource.username: postgres
+      spring.datasource.password: postgres
+      jwt.secret-key: mySecretKeyForDisputeHubPortalShouldBeAtLeast256BitsLongForHS256Algorithm
+      cors.allowed-origins: http://localhost:3000,http://localhost
     ports:
       - "8080:8080"
     depends_on:

@@ -55,9 +55,20 @@ export const AdminDashboard: React.FC = () => {
     });
   };
 
+  const toDisputeStatus = (status: string): DisputeStatus => {
+    switch (status) {
+      case DisputeStatus.PENDING: return DisputeStatus.PENDING;
+      case DisputeStatus.UNDER_REVIEW: return DisputeStatus.UNDER_REVIEW;
+      case DisputeStatus.MERCHANT_CONTACTED: return DisputeStatus.MERCHANT_CONTACTED;
+      case DisputeStatus.RESOLVED: return DisputeStatus.RESOLVED;
+      case DisputeStatus.REJECTED: return DisputeStatus.REJECTED;
+      default: throw new Error(`Unknown dispute status: ${status}`);
+    }
+  };
+
   const openStatusModal = (dispute: Dispute) => {
     setSelectedDispute(dispute);
-    setNewStatus(dispute.status);
+    setNewStatus(toDisputeStatus(dispute.status));
     setShowStatusModal(true);
     setError('');
   };

@@ -17,8 +17,8 @@ export const CustomerDashboard: React.FC = () => {
 
   // Fetch transactions (paginated)
   const { data: transactionsPage, isLoading: transactionsLoading } = useQuery({
-    queryKey: ['transactions', transactionPage, 2],
-    queryFn: () => apiService.getTransactions(transactionPage, 2),
+    queryKey: ['transactions', transactionPage, 20],
+    queryFn: () => apiService.getTransactions(transactionPage, 20),
   });
 
   // Fetch disputeable transactions (paginated - first page only)
