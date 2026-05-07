@@ -38,7 +38,7 @@ DisputeHub allows bank customers to view their transactions and dispute them whe
 
 ```bash
 # Clone or navigate to project directory
-cd Assessment
+cd DisputeHub
 
 # Start all services
 docker-compose up --build
@@ -81,7 +81,7 @@ docker-compose up --build
 ## 📁 Project Structure
 
 ```
-Assessment/
+DisputeHub/
 ├── backend/                    # Spring Boot application
 │   ├── src/
 │   │   ├── main/
