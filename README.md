@@ -311,56 +311,83 @@ Response: { "id": 1, "status": "RESOLVED", ... }
 
 ```sql
 -- Users table
-users (
+CREATE TABLE users (
   id BIGSERIAL PRIMARY KEY,
-  username VARCHAR(50) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,  -- BCrypt hashed
+  username VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,           -- BCrypt hashed
   full_name VARCHAR(255),
   email VARCHAR(255),
-  role VARCHAR(20) NOT NULL,       -- CUSTOMER or ADMIN
-  created_at TIMESTAMP NOT NULL
-)
+  role VARCHAR(255) NOT NULL,               -- CUSTOMER or ADMIN (enum)
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
 -- Transactions table
-transactions (
+CREATE TABLE transactions (
   id BIGSERIAL PRIMARY KEY,
-  user_id BIGINT NOT NULL REFERENCES users(id),
+  user_id BIGINT NOT NULL,
   merchant_name VARCHAR(255) NOT NULL,
   amount DECIMAL(19,2) NOT NULL,
   transaction_date TIMESTAMP NOT NULL,
-  category VARCHAR(100),
-  description VARCHAR(500),
-  reference_number VARCHAR(100),
-  created_at TIMESTAMP NOT NULL
-)
+  category VARCHAR(255),
+  description VARCHAR(255),
+  reference_number VARCHAR(255),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_transaction_user FOREIGN KEY (user_id) 
+    REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_transactions_user_id ON transactions(user_id);
+CREATE INDEX idx_transactions_date ON transactions(transaction_date DESC);
 
 -- Disputes table
-disputes (
+CREATE TABLE disputes (
   id BIGSERIAL PRIMARY KEY,
-  transaction_id BIGINT UNIQUE NOT NULL REFERENCES transactions(id),
-  user_id BIGINT NOT NULL REFERENCES users(id),
+  transaction_id BIGINT UNIQUE NOT NULL,    -- One dispute per transaction
+  user_id BIGINT NOT NULL,
   reason VARCHAR(255) NOT NULL,
-  description VARCHAR(1000) NOT NULL,
-  status VARCHAR(50) NOT NULL,     -- PENDING, UNDER_REVIEW, etc.
-  resolution_notes VARCHAR(1000),
-  evidence_url VARCHAR(500),
-  created_at TIMESTAMP NOT NULL,
-  updated_at TIMESTAMP NOT NULL,
-  resolved_at TIMESTAMP
-)
+  description VARCHAR(255) NOT NULL,
+  status VARCHAR(255) NOT NULL,             -- PENDING, UNDER_REVIEW, MERCHANT_CONTACTED, RESOLVED, REJECTED
+  resolution_notes VARCHAR(255),
+  evidence_url VARCHAR(255),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  resolved_at TIMESTAMP,
+  CONSTRAINT fk_dispute_transaction FOREIGN KEY (transaction_id) 
+    REFERENCES transactions(id) ON DELETE CASCADE,
+  CONSTRAINT fk_dispute_user FOREIGN KEY (user_id) 
+    REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_disputes_user_id ON disputes(user_id);
+CREATE INDEX idx_disputes_status ON disputes(status);
+CREATE INDEX idx_disputes_created_at ON disputes(created_at DESC);
 
 -- Audit logs table
-audit_logs (
+CREATE TABLE audit_logs (
   id BIGSERIAL PRIMARY KEY,
-  dispute_id BIGINT NOT NULL REFERENCES disputes(id),
-  actor_id BIGINT NOT NULL REFERENCES users(id),
-  action VARCHAR(100) NOT NULL,
+  dispute_id BIGINT NOT NULL,
+  actor_id BIGINT NOT NULL,
+  action VARCHAR(255) NOT NULL,
   old_value VARCHAR(255),
   new_value VARCHAR(255),
-  notes VARCHAR(500),
-  timestamp TIMESTAMP NOT NULL
-)
+  notes VARCHAR(255),
+  timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_auditlog_dispute FOREIGN KEY (dispute_id) 
+    REFERENCES disputes(id) ON DELETE CASCADE,
+  CONSTRAINT fk_auditlog_actor FOREIGN KEY (actor_id) 
+    REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_audit_logs_dispute_id ON audit_logs(dispute_id);
+CREATE INDEX idx_audit_logs_timestamp ON audit_logs(timestamp DESC);
 ```
+
+**Key Constraints:**
+- `UNIQUE` on `users.username` - no duplicate usernames
+- `UNIQUE` on `disputes.transaction_id` - one dispute per transaction
+- `NOT NULL` on all required fields
+- `ON DELETE CASCADE` - delete related records when parent is deleted
+- Indexes on foreign keys and frequently queried fields for performance
 
 ## 🧪 Testing
 
